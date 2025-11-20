@@ -94,12 +94,11 @@ document.getElementById("holder").addEventListener("mouseup", async () => {
     output.textContent = "Probíhá OCR…";
 
     try {
-        // Tesseract 4 - recognize přímo, URL k mrz.traineddata
         const result = await Tesseract.recognize(
             canvas,
             'mrz',
             {
-                langPath: 'https://dominik9g.github.io/mrz-ocr/', // musí ukazovat na mrz.traineddata
+                langPath: 'https://dominik9g.github.io/mrz-ocr/', // URL k mrz.traineddata.gz
                 tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
                 logger: m => console.log(m)
             }
