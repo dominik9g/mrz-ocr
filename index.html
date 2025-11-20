@@ -85,16 +85,17 @@ document.getElementById("holder").addEventListener("mouseup", async () => {
 
     output.textContent = "Probíhá OCR…";
 
+    // Inicializace workeru s mrz.traineddata přes URL
     const worker = Tesseract.createWorker({
-        langPath: "./", // složka, kde je mrz.traineddata
-        logger: m => console.log(m)
+        logger: m => console.log(m),
+        langPath: 'https://dominik9g.github.io/mrz-ocr/' // URL k mrz.traineddata
     });
 
     await worker.load();
-    await worker.loadLanguage("mrz");
-    await worker.initialize("mrz");
+    await worker.loadLanguage('mrz');
+    await worker.initialize('mrz');
 
-    const result = await worker.recognize(canvas, { 
+    const result = await worker.recognize(canvas, {
         tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"
     });
 
