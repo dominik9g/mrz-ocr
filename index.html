@@ -34,18 +34,27 @@ const selection = document.getElementById("selection");
 let stream;
 
 document.getElementById("shareBtn").onclick = async () => {
-    stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-    video.srcObject = stream;
+    try {
+        stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        video.srcObject = stream;
+        output.textContent = "Sdílení obrazovky aktivní, vyber oblast pro OCR...";
+    } catch (err) {
+        console.error(err);
+        output.textContent = "Chyba při sdílení obrazovky: " + err.message;
+    }
 };
 
 let selecting = false;
 let startX, startY, endX, endY;
 
 document.getElementById("holder").addEventListener("mousedown", e => {
+    if (!stream) return;
     const rect = video.getBoundingClientRect();
     selecting = true;
+
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
+
     selection.style.left = startX + "px";
     selection.style.top = startY + "px";
     selection.style.width = "0px";
@@ -57,6 +66,7 @@ document.getElementById("holder").addEventListener("mousemove", e => {
     const rect = video.getBoundingClientRect();
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
+
     selection.style.left = Math.min(startX, endX) + "px";
     selection.style.top = Math.min(startY, endY) + "px";
     selection.style.width = Math.abs(endX - startX) + "px";
@@ -64,36 +74,46 @@ document.getElementById("holder").addEventListener("mousemove", e => {
 });
 
 document.getElementById("holder").addEventListener("mouseup", async () => {
+    if (!stream || !selecting) return;
     selecting = false;
+
     const sx = Math.min(startX, endX);
     const sy = Math.min(startY, endY);
     const sw = Math.abs(endX - startX);
     const sh = Math.abs(endY - startY);
+
     canvas.width = sw;
     canvas.height = sh;
     const ctx = canvas.getContext("2d");
-    await new Promise(r => setTimeout(r, 50));
+
+    await new Promise(r => setTimeout(r, 50)); // čekání na frame
+
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+
     output.textContent = "Probíhá OCR…";
 
-    const worker = createWorker({
-        logger: m => console.log(m),
-        langPath: 'https://dominik9g.github.io/mrz-ocr/'
-    });
+    try {
+        const worker = createWorker({
+            logger: m => console.log(m),
+            langPath: 'https://dominik9g.github.io/mrz-ocr/' // URL k mrz.traineddata
+        });
 
-    await worker.load();
-    await worker.loadLanguage('mrz');
-    await worker.initialize('mrz');
+        await worker.load();
+        await worker.loadLanguage('mrz');
+        await worker.initialize('mrz');
 
-    const result = await worker.recognize(canvas, {
-        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"
-    });
+        const result = await worker.recognize(canvas, {
+            tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"
+        });
 
-    output.textContent = result.data.text;
-    await worker.terminate();
+        output.textContent = result.data.text;
+        await worker.terminate();
+    } catch (err) {
+        console.error(err);
+        output.textContent = "Chyba při OCR: " + err.message;
+    }
 });
 </script>
 
 </body>
 </html>
-
