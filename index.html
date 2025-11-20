@@ -5,7 +5,7 @@
 <title>NumerID</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM1NUM0NUYiLz48dGV4dCB4PSIzMiIgeT0iMzIiIGZvbnQtc2l6ZT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBmaWxsPSIjMDAwIiBmb250LXdlaWdodD0iNzAwIiBmb250LWZhbWlseT0iUm9ib3RvLCBTYW5zLXNlcmlmIj5JRDwvdGV4dD48L3N2Zz4=">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM1NUM0NUYiLz48dGV4dCB4PSIzMiIgeT0iMzIiIGZvbnQtc2l6ZT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBmaWxsPSIjMDAwIiBmb250LXdlaWdodD0iNzAwIiBmb250LWZhbWlseT0iUm9ib3RvLCBTYW5zLXNlcmlmIj5JRDwvdGV4dD48L2N2Zz4=">
 
 <style>
   body {
@@ -139,21 +139,21 @@
   .kontrola-btn:hover { background: #333; }
   .ocr-btn:hover { background: #333; }
 
-  /* OCR ZPRÁVY POD TLAČÍTKY */
+  /* OCR ZPRÁVY POD TLAČÍTKY (Nové styly) */
   .ocr-message-area {
       margin-top: 15px;
-      padding-top: 5px; /* Mezera od tlačítek */
+      padding-top: 5px; 
       font-size: 0.95em;
       min-height: 1.2em;
       line-height: 1.2em;
       font-weight: 600;
-      color: #222; /* Výchozí barva pro instrukce/probíhá */
+      color: #222; /* Default */
   }
   .ocr-message-area.success {
-      color: #008800; /* Barva pro úspěch (tmavě zelená) */
+      color: #7cc400; /* Green color match */
   }
   .ocr-message-area.error {
-      color: #ff6b6b; /* Barva pro chybu (červená) */
+      color: #ff6b6b; /* Error red */
   }
   /* Konec OCR ZPRÁV */
 
@@ -187,6 +187,7 @@
   }
 
   .mrz-result b { color: #9fdc00;}
+  /* Odstraněny .ok a .bad styly */
 
 .insert-btn {
   background: #888;         
@@ -223,7 +224,6 @@
     max-width: 90vw; 
     max-height: 90vh;
     display: none;
-    cursor: crosshair; /* Křížový kurzor pro výběr */
 }
 
 #ocr-holder video { 
@@ -232,14 +232,12 @@
     height: auto;
     border: 3px solid #9fdc00; 
     display: block; 
-    pointer-events: none; /* KLÍČOVÉ: Zajistí, že události myši jdou na #ocr-holder */
 }
 
 #ocr-selection { 
     position: absolute; 
     border: 2px dashed red; 
     pointer-events: none; 
-    z-index: 10001; /* Ujistí se, že rámeček je vidět přes video */
 }
 
 #ocr-canvas { display: none; }
@@ -310,6 +308,8 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script type="module">
+
+// Odstraněny konstanty successAudio a errorAudio
 
 /* MRZ CHECK-DIGIT FUNKCE */
 function charValue(c) {
@@ -394,10 +394,6 @@ const countryCodes = {
   "ZAR":"Zaire","ZMB":"Zambia","ZWE":"Zimbabwe","XXA":"Bez st. příslušnosti","XXX":"Bez st. příslušnosti","XXK":"Kosovo"
 };
 
-function checkStatusText(isOk) {
-    return isOk ? "(OK)" : "(NOK)";
-}
-
 function validatePassport(lines){
   const [l1,l2] = lines;
   if(l1.length !== 44 || l2.length !== 44) {
@@ -410,12 +406,13 @@ function validatePassport(lines){
   const nationalityCode = l2.substring(10,13);
   const dob = l2.substring(13,19);
   const dobCD = l2[19];
+  const sex = l2[20];
   const exp = l2.substring(21,27);
   const expCD = l2[27];
   const personalRaw = l2.substring(28,42);
   const personalCD = l2[42];
-  const compositeStr = l2.substring(0,10) + l2.substring(13,20) + l2.substring(21,43);
   const compCD = l2[43];
+  const compositeStr = l2.substring(0,10) + l2.substring(13,20) + l2.substring(21,43);
 
   const docNumCheck = calcMRZDigit(padRight(docNum,9))===docCD;
   const dobCheck = calcMRZDigit(dob)===dobCD;
@@ -425,16 +422,21 @@ function validatePassport(lines){
 
   let out = "<b>Výsledky kontroly pasu:</b>\n\n";
   out += `Osobní číslo (rč): ${personalRaw.replace(/</g,'')}\n`;
-  out += `Vydavatel: ${countryCodes[issuingCountryCode]||"Neznámý"} (${issuingCountryCode}) ${checkStatusText(issuingCountryCode in countryCodes)}\n`;
-  out += `Číslo pasu: ${docNum.replace(/<+$/,'')} ${checkStatusText(docNumCheck)}\n`;
-  out += `Národnost: ${countryCodes[nationalityCode]||"Neznámý"} (${nationalityCode}) ${checkStatusText(nationalityCode in countryCodes)}\n`;
-  out += `Datum narození: ${formatDateYYMMDD(dob,'birth')} ${checkStatusText(dobCheck)}\n`;
-  out += `Datum expirace: ${formatDateYYMMDD(exp,'expiry')} ${checkStatusText(expCheck)}\n`;
-  out += `Kontrolní číslice z čísla dokladu: ${checkStatusText(docNumCheck)}\n`;
-  out += `Kontrolní číslice z data narození: ${checkStatusText(dobCheck)}\n`;
-  out += `Kontrolní číslice z data expirace: ${checkStatusText(expCheck)}\n`;
-  out += `Kontrolní číslice z osobního čísla: ${checkStatusText(personalCheck)}\n`;
-  out += `Finalní kontrolní číslice: ${checkStatusText(compositeCheck)}`;
+  out += `Vydavatel: ${countryCodes[issuingCountryCode]||"Neznámý"} (${issuingCountryCode}) ` +
+            ((issuingCountryCode in countryCodes)?"(OK)\n":"(NOK)\n");
+  out += `Číslo pasu: ${docNum.replace(/<+$/,'')} ` + 
+            (docNumCheck ? "(OK)\n" : "(NOK)\n");
+  out += `Národnost: ${countryCodes[nationalityCode]||"Neznámý"} (${nationalityCode}) ` + 
+            ((nationalityCode in countryCodes)?"(OK)\n":"(NOK)\n");
+  out += `Datum narození: ${formatDateYYMMDD(dob,'birth')} ` + 
+            (dobCheck ? "(OK)\n" : "(NOK)\n");
+  out += `Datum expirace: ${formatDateYYMMDD(exp,'expiry')} ` + 
+            (expCheck ? "(OK)\n" : "(NOK)\n");
+  out += `Kontrolní číslice z čísla dokladu: ${docNumCheck ? "(OK)" : "(NOK)"}\n`;
+  out += `Kontrolní číslice z data narození: ${dobCheck ? "(OK)" : "(NOK)"}\n`;
+  out += `Kontrolní číslice z data expirace: ${expCheck ? "(OK)" : "(NOK)"}\n`;
+  out += `Kontrolní číslice z osobního čísla: ${personalCheck ? "(OK)" : "(NOK)"}\n`;
+  out += `Finalní kontrolní číslice: ${compositeCheck ? "(OK)" : "(NOK)"}`;
 
   return {ok:true, html:out};
 }
@@ -453,7 +455,7 @@ function validateID(lines){
   const personal=l2.substring(18,29); 
   const composite=padRight(docnum,9)+docCD+dob+dobCD+exp+expCD+padRight(personal,11);
   const compositeCD=l2[29];
-  
+
   const docNumCheck = calcMRZDigit(padRight(docnum,9))===docCD;
   const dobCheck = calcMRZDigit(dob)===dobCD;
   const expCheck = calcMRZDigit(exp)===expCD;
@@ -462,11 +464,12 @@ function validateID(lines){
   let out="<b>Výsledky kontroly OP/NPT/PPP:</b>\n\n";
   const personalTrimmed = personal.replace(/</g,'').trim();
   if(personalTrimmed) out+="Osobní číslo: "+personalTrimmed+"\n";
-  out+="Číslo dokladu: "+docnum+" "+checkStatusText(docNumCheck)+"\n";
-  out+="Datum narození: "+formatDateYYMMDD(dob,'birth')+" "+checkStatusText(dobCheck)+"\n";
-  out+="Datum expirace: "+formatDateYYMMDD(exp,'expiry')+" "+checkStatusText(expCheck)+"\n";
+  out+="Číslo dokladu: "+docnum+" "+(docNumCheck?"(OK)\n":"(NOK)\n");
+  out+="Datum narození: "+formatDateYYMMDD(dob,'birth')+" "+(dobCheck?"(OK)\n":"(NOK)\n");
+  out+="Datum expirace: "+formatDateYYMMDD(exp,'expiry')+" "+(expCheck?"(OK)\n":"(NOK)\n");
 
-  out+="Kontrolní číslice: "+checkStatusText(compositeCheck);
+
+  out+="Kontrolní číslice: "+(compositeCheck?"(OK)":"(NOK)");
 
   return {ok:true, html:out};
 }
@@ -482,7 +485,7 @@ document.querySelectorAll(".section").forEach(sec=>{
     let output;
     if(inputs.length===3){output=validateID(inputs).html;}
     else if(inputs.length===2){output=validatePassport(inputs).html;}
-    else{output="Neplatný počet řádků.";}
+    else{output="Neplatný počet řádků.";} // Odstraněn ❌
     
     resultDiv.innerHTML=output;
     resultDiv.classList.add('show');
@@ -502,7 +505,7 @@ document.querySelectorAll('.insert-btn').forEach(btn=>{
 
 
 // ---------------------------------------------
-// LOGIKA PRO OCR ZE SDÍLENÉ OBRAZOVKY
+// LOGIKA PRO OCR ZE SDÍLENÉ OBRAZOVKY (Logika výběru myší zůstala zachována)
 // ---------------------------------------------
 const ocrVideo = document.getElementById("ocr-video");
 const ocrCanvas = document.getElementById("ocr-canvas");
@@ -510,14 +513,17 @@ const ocrSelection = document.getElementById("ocr-selection");
 const ocrHolder = document.getElementById("ocr-holder");
 const ocrOverlay = document.getElementById("ocr-overlay");
 let currentStream;
-let targetInputs; // Pole pro uložení vstupních polí
+let targetInputs; // Pole pro uložení vstupních polí, kam se má uložit výsledek
 let numLines; // Počet očekávaných řádků (2 nebo 3)
-let currentSection; // Odkaz na sekci, pro kterou běží OCR
+let currentSection; // Odkaz na sekci, pro kterou běží OCR (pro aktualizaci statusu)
+
+let selecting = false;
+let startX, startY, endX, endY;
 
 function updateStatus(sec, message, statusClass = '') {
-    const statusDiv = sec.querySelector('.ocr-message-area');
+    const statusDiv = sec.querySelector('.ocr-message-area'); // Target the new div
     if (statusDiv) {
-        statusDiv.textContent = message;
+        statusDiv.textContent = message.replace(/[✅❌✔]/g, ''); // Odstranění ikon z hlášky
         statusDiv.className = 'ocr-message-area ' + statusClass;
     }
 }
@@ -537,10 +543,10 @@ async function startScreenShare(section, inputs, lines) {
         ocrHolder.style.display = 'block';
         ocrOverlay.style.display = 'block';
         
-        updateStatus(currentSection, "Sdílení obrazovky aktivní. Vyberte oblast MRZ myší a pusťte.");
+        updateStatus(currentSection, "Vyberte oblast MRZ myší a pusťte...");
     } catch (err) {
         console.error(err);
-        updateStatus(currentSection, "Chyba při sdílení obrazovky: Operace byla zrušena, nebo je funkce blokována prohlížečem.", 'error');
+        updateStatus(currentSection, "Chyba při sdílení: Operace byla zrušena, nebo je funkce blokována prohlížečem.", 'error');
         ocrHolder.style.display = 'none';
         ocrOverlay.style.display = 'none';
     }
@@ -569,18 +575,15 @@ document.querySelectorAll(".ocr-btn").forEach(btn => {
     });
 });
 
-// Události pro výběr myší
+// Události pro výběr myší (Logika ponechána beze změny)
 
 // Začátek výběru
 ocrHolder.addEventListener("mousedown", e => {
     if (!currentStream) return;
     const rect = ocrVideo.getBoundingClientRect();
     selecting = true;
-    // Výpočet pozice relativně k video elementu
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
-    
-    // Nastavení počáteční pozice výběrového rámečku
     ocrSelection.style.left = startX + "px";
     ocrSelection.style.top = startY + "px";
     ocrSelection.style.width = "0px";
@@ -594,13 +597,12 @@ ocrHolder.addEventListener("mousemove", e => {
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
     
-    // Zajištění, že výběr zůstane uvnitř videa
+    // Zajištění, že se výběr neobjeví mimo video
     const videoWidth = ocrVideo.clientWidth;
     const videoHeight = ocrVideo.clientHeight;
     endX = Math.max(0, Math.min(endX, videoWidth));
     endY = Math.max(0, Math.min(endY, videoHeight));
 
-    // Přepočet a nastavení pozice a velikosti
     ocrSelection.style.left = Math.min(startX, endX) + "px";
     ocrSelection.style.top = Math.min(startY, endY) + "px";
     ocrSelection.style.width = Math.abs(endX - startX) + "px";
@@ -618,7 +620,7 @@ ocrHolder.addEventListener("mouseup", async () => {
     const sh = Math.abs(endY - startY);
 
     if (sw < 10 || sh < 10) { 
-        updateStatus(currentSection, "Výběr je příliš malý. Zkuste to znovu.", 'error');
+        updateStatus(currentSection, "Výběr je příliš malý.", 'error'); 
         stopScreenShare();
         return;
     }
@@ -627,6 +629,7 @@ ocrHolder.addEventListener("mouseup", async () => {
     ocrCanvas.height = sh;
     const ctx = ocrCanvas.getContext("2d");
 
+    // Krátká prodleva pro stabilizaci snímku, pokud je potřeba
     await new Promise(r => setTimeout(r, 50)); 
     ctx.drawImage(ocrVideo, sx, sy, sw, sh, 0, 0, sw, sh);
 
@@ -645,6 +648,7 @@ ocrHolder.addEventListener("mouseup", async () => {
 
         const mrzText = result.data.text.trim().toUpperCase();
         
+        // Rozdělení na řádky a vyplnění polí
         const lines = mrzText.split('\n').filter(line => line.trim().length > 0);
         
         if(lines.length < numLines) {
@@ -658,12 +662,13 @@ ocrHolder.addEventListener("mouseup", async () => {
             }
         }
         
-        updateStatus(currentSection, "OCR úspěšně dokončeno. Řádky vyplněny.", 'success');
+        updateStatus(currentSection, "OCR dokončeno. Řádky vyplněny.", 'success');
 
     } catch (err) {
         console.error(err);
         updateStatus(currentSection, "Chyba při OCR: Nepodařilo se rozpoznat text. Zkuste to znovu.", 'error');
     } finally {
+        // Zavřít sdílení obrazovky po dokončení OCR
         stopScreenShare();
     }
 });
