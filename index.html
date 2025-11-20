@@ -24,9 +24,9 @@ body { font-family: Arial; background:#f3f3f3; padding:20px; }
 <canvas id="canvas"></canvas>
 <pre id="output"></pre>
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script type="module">
+import { createWorker } from 'https://cdn.jsdelivr.net/npm/tesseract.js@5.4.0/dist/tesseract.esm.js';
 
-<script>
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const output = document.getElementById("output");
@@ -44,10 +44,8 @@ let startX, startY, endX, endY;
 document.getElementById("holder").addEventListener("mousedown", e => {
     const rect = video.getBoundingClientRect();
     selecting = true;
-
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
-
     selection.style.left = startX + "px";
     selection.style.top = startY + "px";
     selection.style.width = "0px";
@@ -56,11 +54,9 @@ document.getElementById("holder").addEventListener("mousedown", e => {
 
 document.getElementById("holder").addEventListener("mousemove", e => {
     if (!selecting) return;
-
     const rect = video.getBoundingClientRect();
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
-
     selection.style.left = Math.min(startX, endX) + "px";
     selection.style.top = Math.min(startY, endY) + "px";
     selection.style.width = Math.abs(endX - startX) + "px";
@@ -69,26 +65,20 @@ document.getElementById("holder").addEventListener("mousemove", e => {
 
 document.getElementById("holder").addEventListener("mouseup", async () => {
     selecting = false;
-
     const sx = Math.min(startX, endX);
     const sy = Math.min(startY, endY);
     const sw = Math.abs(endX - startX);
     const sh = Math.abs(endY - startY);
-
     canvas.width = sw;
     canvas.height = sh;
     const ctx = canvas.getContext("2d");
-
     await new Promise(r => setTimeout(r, 50));
-
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
-
     output.textContent = "Probíhá OCR…";
 
-    // Inicializace workeru s mrz.traineddata přes URL
-    const worker = Tesseract.createWorker({
+    const worker = createWorker({
         logger: m => console.log(m),
-        langPath: 'https://dominik9g.github.io/mrz-ocr/' // URL k mrz.traineddata
+        langPath: 'https://dominik9g.github.io/mrz-ocr/'
     });
 
     await worker.load();
@@ -100,10 +90,10 @@ document.getElementById("holder").addEventListener("mouseup", async () => {
     });
 
     output.textContent = result.data.text;
-
     await worker.terminate();
 });
 </script>
 
 </body>
 </html>
+
