@@ -623,15 +623,14 @@ ocrHolder.addEventListener("mouseup", async () => {
     updateStatus(currentSection, "Probíhá OCR, prosím čekejte...");
     
     try {
-        const result = await Tesseract.recognize(
-            ocrCanvas,
-            'mrz',
-            {
-                langPath: 'https://dominik9g.github.io/mrz-ocr/mrz.traineddata.gz', 
-                tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
-                logger: m => console.log(m)
-            }
-        );
+    const result = await Tesseract.recognize(
+        ocrCanvas,
+        'eng', // Použijte základní anglický model jako fallback
+        {
+            tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
+            logger: m => console.log(m)
+        }
+    );
 
         const mrzText = result.data.text.trim().toUpperCase();
         
