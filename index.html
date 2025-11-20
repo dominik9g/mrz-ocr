@@ -24,15 +24,17 @@ body { font-family: Arial; background:#f3f3f3; padding:20px; }
 <canvas id="canvas"></canvas>
 <pre id="output"></pre>
 
-<script type="module">
-import { createWorker } from 'https://cdn.jsdelivr.net/npm/tesseract.js@5.4.0/dist/tesseract.esm.js';
+<!-- Klasický UMD build Tesseract.js -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
+<script>
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const output = document.getElementById("output");
 const selection = document.getElementById("selection");
 let stream;
 
+// Sdílení obrazovky
 document.getElementById("shareBtn").onclick = async () => {
     try {
         stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
@@ -47,32 +49,32 @@ document.getElementById("shareBtn").onclick = async () => {
 let selecting = false;
 let startX, startY, endX, endY;
 
+// Začátek výběru
 document.getElementById("holder").addEventListener("mousedown", e => {
     if (!stream) return;
     const rect = video.getBoundingClientRect();
     selecting = true;
-
     startX = e.clientX - rect.left;
     startY = e.clientY - rect.top;
-
     selection.style.left = startX + "px";
     selection.style.top = startY + "px";
     selection.style.width = "0px";
     selection.style.height = "0px";
 });
 
+// Pohyb myši při výběru
 document.getElementById("holder").addEventListener("mousemove", e => {
     if (!selecting) return;
     const rect = video.getBoundingClientRect();
     endX = e.clientX - rect.left;
     endY = e.clientY - rect.top;
-
     selection.style.left = Math.min(startX, endX) + "px";
     selection.style.top = Math.min(startY, endY) + "px";
     selection.style.width = Math.abs(endX - startX) + "px";
     selection.style.height = Math.abs(endY - startY) + "px";
 });
 
+// Konec výběru a OCR
 document.getElementById("holder").addEventListener("mouseup", async () => {
     if (!stream || !selecting) return;
     selecting = false;
@@ -86,14 +88,13 @@ document.getElementById("holder").addEventListener("mouseup", async () => {
     canvas.height = sh;
     const ctx = canvas.getContext("2d");
 
-    await new Promise(r => setTimeout(r, 50)); // čekání na frame
-
+    await new Promise(r => setTimeout(r, 50));
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
 
     output.textContent = "Probíhá OCR…";
 
     try {
-        const worker = createWorker({
+        const worker = Tesseract.createWorker({
             logger: m => console.log(m),
             langPath: 'https://dominik9g.github.io/mrz-ocr/' // URL k mrz.traineddata
         });
