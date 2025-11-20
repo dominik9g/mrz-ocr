@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>MRZ OCR – Tesseract.js</title>
+<title>MRZ OCR – Tesseract.js 4</title>
 <style>
 body { font-family: Arial; background:#f3f3f3; padding:20px; }
 #video { max-width: 100%; border:2px solid #333; }
@@ -13,7 +13,7 @@ body { font-family: Arial; background:#f3f3f3; padding:20px; }
 </head>
 <body>
 
-<h2>MRZ OCR – Tesseract.js</h2>
+<h2>MRZ OCR – Tesseract.js 4</h2>
 <button id="shareBtn">Sdílet obrazovku</button>
 
 <div id="holder" style="position:relative; display:inline-block; margin-top:20px;">
@@ -24,8 +24,8 @@ body { font-family: Arial; background:#f3f3f3; padding:20px; }
 <canvas id="canvas"></canvas>
 <pre id="output"></pre>
 
-<!-- Klasický UMD build Tesseract.js -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- UMD build Tesseract 4 -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script>
 const video = document.getElementById("video");
@@ -94,21 +94,18 @@ document.getElementById("holder").addEventListener("mouseup", async () => {
     output.textContent = "Probíhá OCR…";
 
     try {
-        const worker = Tesseract.createWorker({
-            logger: m => console.log(m),
-            langPath: 'https://dominik9g.github.io/mrz-ocr/' // URL k mrz.traineddata
-        });
-
-        await worker.load();
-        await worker.loadLanguage('mrz');
-        await worker.initialize('mrz');
-
-        const result = await worker.recognize(canvas, {
-            tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"
-        });
+        // Tesseract 4 - recognize přímo, URL k mrz.traineddata
+        const result = await Tesseract.recognize(
+            canvas,
+            'mrz',
+            {
+                langPath: 'https://dominik9g.github.io/mrz-ocr/', // musí ukazovat na mrz.traineddata
+                tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
+                logger: m => console.log(m)
+            }
+        );
 
         output.textContent = result.data.text;
-        await worker.terminate();
     } catch (err) {
         console.error(err);
         output.textContent = "Chyba při OCR: " + err.message;
