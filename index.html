@@ -194,6 +194,7 @@
     background: rgba(0, 0, 0, 0.9);
     z-index: 9999;
     display: none;
+    cursor: pointer;
 }
 
 #ocr-holder {
@@ -233,6 +234,101 @@
     display: inline-block;
     color: #000;
 }
+
+.ocr-close-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    z-index: 10001;
+}
+
+.ocr-close-btn:hover {
+    background: #ff5252;
+}
+
+/* Responzivní styly pro mobilní zařízení */
+@media (max-width: 768px) {
+    .wrapper {
+        width: 95%;
+        margin: 15px 0;
+    }
+    
+    .header {
+        font-size: 2.2em;
+        padding: 20px 0;
+        border-radius: 12px;
+    }
+    
+    .section {
+        margin: 20px 0;
+        padding: 15px 20px 20px 20px;
+        border-radius: 12px;
+    }
+    
+    .mrz-result {
+        position: relative;
+        left: 0;
+        width: 100%;
+        margin-top: 15px;
+        transform: translateX(0);
+    }
+    
+    .mrz-result.show {
+        transform: translateX(0);
+    }
+    
+    #ocr-holder {
+        max-width: 95vw;
+        max-height: 85vh;
+    }
+    
+    .kontrola-btn, .ocr-btn {
+        padding: 8px 16px;
+        font-size: 1em;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        font-size: 1.8em;
+        padding: 15px 0;
+    }
+    
+    .section {
+        padding: 12px 15px 15px 15px;
+    }
+    
+    .section h2 {
+        font-size: 1.1em;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .help-btn {
+        margin-top: 8px;
+        align-self: flex-end;
+    }
+    
+    .kontrola-btn, .ocr-btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    input {
+        font-size: 0.9em;
+        padding: 8px;
+    }
+}
 </style>
 </head>
 <body>
@@ -242,7 +338,7 @@
  
 <div class="section" id="mrz-id-section">
   <h2>MRZ – OP/NPT/PPP
-    <button class="help-btn">?
+    <button class="help-btn" aria-label="Zobrazit nápovědu pro MRZ OP/NPT/PPP">?
       <div class="tooltip">1. Zadej první, druhý a třetí řádek MRZ včetně šipek.<br>
           2. Šipky můžeš vkládat pomocí kliknutí na tlačítko vedle vkládacího pole.<br>
           3. Poté klikni na <b>KONTROLA</b>.<br>
@@ -250,26 +346,26 @@
     </button>
   </h2>
   <div style="display:flex; align-items:center; margin-bottom:8px;">
-    <input type="text" placeholder="Řádek 1 (MRZ ID)">
-    <button class="insert-btn" style="margin-left:5px;">&lt;</button>
+    <input type="text" placeholder="Řádek 1 (MRZ ID)" aria-label="První řádek MRZ pro OP/NPT/PPP">
+    <button class="insert-btn" style="margin-left:5px;" aria-label="Vložit šipku">&lt;</button>
   </div>
   <div style="display:flex; align-items:center; margin-bottom:8px;">
-    <input type="text" placeholder="Řádek 2 (MRZ ID)">
-    <button class="insert-btn" style="margin-left:5px;">&lt;</button>
+    <input type="text" placeholder="Řádek 2 (MRZ ID)" aria-label="Druhý řádek MRZ pro OP/NPT/PPP">
+    <button class="insert-btn" style="margin-left:5px;" aria-label="Vložit šipku">&lt;</button>
   </div>
   <div style="display:flex; align-items:center; margin-bottom:8px;">
-    <input type="text" placeholder="Řádek 3 (MRZ ID)">
-    <button class="insert-btn" style="margin-left:5px;">&lt;</button>
+    <input type="text" placeholder="Řádek 3 (MRZ ID)" aria-label="Třetí řádek MRZ pro OP/NPT/PPP">
+    <button class="insert-btn" style="margin-left:5px;" aria-label="Vložit šipku">&lt;</button>
   </div>
-  <button class="kontrola-btn">KONTROLA</button>
-  <button class="ocr-btn" data-lines="3">OCR</button> 
+  <button class="kontrola-btn" aria-label="Provést kontrolu MRZ">KONTROLA</button>
+  <button class="ocr-btn" data-lines="3" aria-label="Spustit OCR pro načtení MRZ">OCR</button> 
   <span class="ocr-status"></span> <div class="mrz-result" aria-live="polite"></div>
 </div>
 
 
 <div class="section" id="mrz-passport-section">
   <h2>MRZ – Cestovní pas 
-    <button class="help-btn">?
+    <button class="help-btn" aria-label="Zobrazit nápovědu pro MRZ cestovního pasu">?
       <div class="tooltip">1. Zadej první a druhý řádek MRZ včetně šipek.<br>
           2. Šipky můžeš vkládat pomocí kliknutí na tlačítko vedle vkládacího pole.<br>
           3. Poté klikni na <b>KONTROLA</b>.<br>
@@ -277,15 +373,15 @@
     </button>
   </h2>
   <div style="display:flex; align-items:center; margin-bottom:8px;">
-    <input type="text" placeholder="Řádek 1 (MRZ pas)">
-    <button class="insert-btn" style="margin-left:5px;">&lt;</button>
+    <input type="text" placeholder="Řádek 1 (MRZ pas)" aria-label="První řádek MRZ pro cestovní pas">
+    <button class="insert-btn" style="margin-left:5px;" aria-label="Vložit šipku">&lt;</button>
   </div>
   <div style="display:flex; align-items:center; margin-bottom:8px;">
-    <input type="text" placeholder="Řádek 2 (MRZ pas)">
-    <button class="insert-btn" style="margin-left:5px;">&lt;</button>
+    <input type="text" placeholder="Řádek 2 (MRZ pas)" aria-label="Druhý řádek MRZ pro cestovní pas">
+    <button class="insert-btn" style="margin-left:5px;" aria-label="Vložit šipku">&lt;</button>
   </div>
-  <button class="kontrola-btn">KONTROLA</button>
-  <button class="ocr-btn" data-lines="2">OCR</button> 
+  <button class="kontrola-btn" aria-label="Provést kontrolu MRZ">KONTROLA</button>
+  <button class="ocr-btn" data-lines="2" aria-label="Spustit OCR pro načtení MRZ">OCR</button> 
   <span class="ocr-status"></span> <div class="mrz-result" aria-live="polite"></div>
 </div>
 
@@ -293,6 +389,7 @@
 
 <div id="ocr-overlay"></div>
 <div id="ocr-holder">
+    <button class="ocr-close-btn" aria-label="Zavřít OCR">Zavřít</button>
     <video id="ocr-video" autoplay></video>
     <div id="ocr-selection"></div>
 </div>
@@ -300,10 +397,6 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
 
 <script type="module">
-
-// Odstraněny proměnné pro audio
-
-// Odstraněna funkce showPopup a popupBtn.onclick
 
 /* MRZ CHECK-DIGIT FUNKCE */
 function charValue(c) {
@@ -338,6 +431,35 @@ function formatDateYYMMDD(yymmdd,mode='birth'){
   if(mode==='birth'){year=(yy>currentYY)?1900+yy:2000+yy;}
   else{year=(yy<70)?2000+yy:1900+yy;}
   return `${dd}.${mm}.${year}`;
+}
+
+/* VALIDACE VSTUPŮ */
+function validateInputs(inputs, expectedLengths) {
+  const errors = [];
+  
+  if (inputs.length !== expectedLengths.length) {
+    errors.push(`Neplatný počet řádků. Očekáváno: ${expectedLengths.length}, zadané: ${inputs.length}`);
+    return { isValid: false, errors };
+  }
+  
+  inputs.forEach((input, index) => {
+    if (input.length === 0) {
+      errors.push(`Řádek ${index + 1} je prázdný`);
+    } else if (input.length !== expectedLengths[index]) {
+      errors.push(`Řádek ${index + 1} má nesprávnou délku. Očekáváno: ${expectedLengths[index]}, zadané: ${input.length}`);
+    }
+    
+    // Kontrola povolených znaků
+    const invalidChars = input.match(/[^A-Z0-9<]/g);
+    if (invalidChars) {
+      errors.push(`Řádek ${index + 1} obsahuje neplatné znaky: ${invalidChars.join(', ')}`);
+    }
+  });
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
 }
 
 /* CP */
@@ -389,11 +511,13 @@ const countryCodes = {
 };
 
 function validatePassport(lines){
-  const [l1,l2] = lines;
-  if(l1.length !== 44 || l2.length !== 44) {
-      return {ok:false, html:"❌ Pas má mít 2 řádky po 44 znacích."};
+  // Validace vstupů
+  const validation = validateInputs(lines, [44, 44]);
+  if (!validation.isValid) {
+    return {ok:false, html:"❌ Chyba ve vstupech:<br>" + validation.errors.join('<br>')};
   }
 
+  const [l1,l2] = lines;
   const issuingCountryCode = l1.substring(2,5);
   const docNum = l2.substring(0,9);
   const docCD  = l2[9];
@@ -426,19 +550,19 @@ function validatePassport(lines){
   out += `Kontrolní číslice z osobního čísla: ${calcMRZDigit(padRight(personalRaw,14))===personalCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}\n`;
   out += `Finalní kontrolní číslice: ${calcMRZDigit(compositeStr)===compCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}`;
 
-  // Zde byl dříve kód pro přehrávání zvuků success/error
-
   return {ok:true, html:out};
 }
 
 
 /* EU NPT */
 function validateID(lines){
-  const [l1,l2,l3]=lines;
-  if(l1.length!==30 || l2.length!==30 || l3.length!==30) {
-      return {ok:false, html:"❌ Doklad má mít 3 řádky po 30 znacích."};
+  // Validace vstupů
+  const validation = validateInputs(lines, [30, 30, 30]);
+  if (!validation.isValid) {
+    return {ok:false, html:"❌ Chyba ve vstupech:<br>" + validation.errors.join('<br>')};
   }
 
+  const [l1,l2,l3]=lines;
   const docnum=l1.substring(5,14), docCD=l1[14];
   const dob=l2.substring(0,6), dobCD=l2[6];
   const exp=l2.substring(8,14), expCD=l2[14];
@@ -456,32 +580,40 @@ function validateID(lines){
 
   out+="Kontrolní číslice: "+(calcMRZDigit(composite)===compositeCD?"<span class='ok'>✔ OK</span>":"<span class='bad'>❌NOK</span>");
 
-  // Zde byl dříve kód pro přehrávání zvuků success/error
-
   return {ok:true, html:out};
 }
 
 
-document.querySelectorAll(".section").forEach(sec=>{
-  const btn=sec.querySelector(".kontrola-btn");
-  if(!btn) return;
-  const resultDiv=sec.querySelector(".mrz-result");
+// SPOLEČNÁ FUNKCE PRO KONTROLU MRZ
+function performMRZCheck(section) {
+  const inputs = [...section.querySelectorAll("input")].map(i => i.value.trim().toUpperCase());
+  let output;
+  
+  if(inputs.length === 3) {
+    output = validateID(inputs).html;
+  } else if(inputs.length === 2) {
+    output = validatePassport(inputs).html;
+  } else {
+    output = "❌ Neplatný počet řádků.";
+  }
+  
+  const resultDiv = section.querySelector(".mrz-result");
+  resultDiv.innerHTML = output;
+  resultDiv.classList.add('show');
+}
 
-  btn.addEventListener("click",()=>{
-    const inputs=[...sec.querySelectorAll("input")].map(i=>i.value.trim().toUpperCase());
-    let output;
-    if(inputs.length===3){output=validateID(inputs).html;}
-    else if(inputs.length===2){output=validatePassport(inputs).html;}
-    else{output="❌ Neplatný počet řádků.";}
-    
-    resultDiv.innerHTML=output;
-    resultDiv.classList.add('show');
+document.querySelectorAll(".section").forEach(sec => {
+  const btn = sec.querySelector(".kontrola-btn");
+  if(!btn) return;
+
+  btn.addEventListener("click", () => {
+    performMRZCheck(sec);
   });
 });
 
 
-document.querySelectorAll('.insert-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
+document.querySelectorAll('.insert-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
     const input = btn.previousElementSibling;
     if(input && input.tagName === 'INPUT'){
       input.value += '<';
@@ -499,15 +631,17 @@ const ocrCanvas = document.getElementById("ocr-canvas");
 const ocrSelection = document.getElementById("ocr-selection");
 const ocrHolder = document.getElementById("ocr-holder");
 const ocrOverlay = document.getElementById("ocr-overlay");
-let currentStream;
-let targetInputs; // Pole pro uložení vstupních polí, kam se má uložit výsledek
-let numLines; // Počet očekávaných řádků (2 nebo 3)
-let currentSection; // Odkaz na sekci, pro kterou běží OCR (pro aktualizaci statusu)
+const ocrCloseBtn = document.querySelector(".ocr-close-btn");
+
+let currentStream = null;
+let targetInputs = null; // Pole pro uložení vstupních polí, kam se má uložit výsledek
+let numLines = null; // Počet očekávaných řádků (2 nebo 3)
+let currentSection = null; // Odkaz na sekci, pro kterou běží OCR (pro aktualizaci statusu)
 
 let selecting = false;
 let startX, startY, endX, endY;
 
-function updateStatus(sec, message, isError=false) {
+function updateStatus(sec, message, isError = false) {
     const statusSpan = sec.querySelector('.ocr-status');
     if (statusSpan) {
         statusSpan.textContent = message;
@@ -525,7 +659,20 @@ async function startScreenShare(section, inputs, lines) {
     document.querySelectorAll('.ocr-status').forEach(span => span.textContent = '');
 
     try {
-        currentStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        currentStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: { 
+                cursor: 'always' 
+            }, 
+            audio: false 
+        });
+        
+        // Přidáme listener pro ukončení streamu uživatelem
+        currentStream.getTracks().forEach(track => {
+            track.addEventListener('ended', () => {
+                stopScreenShare();
+            });
+        });
+        
         ocrVideo.srcObject = currentStream;
         ocrHolder.style.display = 'block';
         ocrOverlay.style.display = 'block';
@@ -536,6 +683,7 @@ async function startScreenShare(section, inputs, lines) {
         updateStatus(currentSection, "❌ Chyba při sdílení: " + err.message, true);
         ocrHolder.style.display = 'none';
         ocrOverlay.style.display = 'none';
+        currentStream = null;
     }
 }
 
@@ -543,13 +691,21 @@ async function startScreenShare(section, inputs, lines) {
 function stopScreenShare() {
     if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
     }
     ocrHolder.style.display = 'none';
     ocrOverlay.style.display = 'none';
     ocrSelection.style.width = "0px";
     ocrSelection.style.height = "0px";
     selecting = false;
-    currentSection = null;
+    
+    if (currentSection) {
+        updateStatus(currentSection, "");
+        currentSection = null;
+    }
+    
+    targetInputs = null;
+    numLines = null;
 }
 
 // Přiřazení události pro OCR tlačítka
@@ -562,7 +718,14 @@ document.querySelectorAll(".ocr-btn").forEach(btn => {
     });
 });
 
-// Události pro výběr myší (posunuty na ocr-overlay/ocr-holder pro lepší kontrolu)
+// Události pro zavírací tlačítko
+ocrCloseBtn.addEventListener("click", stopScreenShare);
+ocrOverlay.addEventListener("click", stopScreenShare);
+
+// Zabránění zavření při kliknutí na samotný holder
+ocrHolder.addEventListener("click", (e) => {
+    e.stopPropagation();
+});
 
 // Začátek výběru
 ocrHolder.addEventListener("mousedown", e => {
@@ -608,7 +771,6 @@ ocrHolder.addEventListener("mouseup", async () => {
 
     if (sw < 10 || sh < 10) { 
         updateStatus(currentSection, "❌ Výběr je příliš malý.", true);
-        stopScreenShare();
         return;
     }
 
@@ -616,22 +778,22 @@ ocrHolder.addEventListener("mouseup", async () => {
     ocrCanvas.height = sh;
     const ctx = ocrCanvas.getContext("2d");
 
-    // Krátká prodleva pro stabilizaci snímku, pokud je potřeba
+    // Krátká prodleva pro stabilizaci snímku
     await new Promise(r => setTimeout(r, 50)); 
     ctx.drawImage(ocrVideo, sx, sy, sw, sh, 0, 0, sw, sh);
 
     updateStatus(currentSection, "Probíhá OCR, prosím čekejte...");
     
     try {
-    const result = await Tesseract.recognize(
-        ocrCanvas,
-        'mrz',
-        {
-            langPath: 'https://cdn.jsdelivr.net/gh/dominik9g/mrz-ocr@main/',
-            tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
-            logger: m => console.log(m)
-        }
-    );
+        const result = await Tesseract.recognize(
+            ocrCanvas,
+            'mrz',
+            {
+                langPath: 'https://cdn.jsdelivr.net/gh/dominik9g/mrz-ocr@main/',
+                tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
+                logger: m => console.log(m)
+            }
+        );
 
         const mrzText = result.data.text.trim().toUpperCase();
         
@@ -640,7 +802,6 @@ ocrHolder.addEventListener("mouseup", async () => {
         
         if(lines.length < numLines) {
             updateStatus(currentSection, `❌ OCR detekovalo jen ${lines.length} řádků (očekáváno ${numLines}). Zkuste to znovu.`, true);
-            stopScreenShare();
             return;
         }
 
@@ -651,6 +812,11 @@ ocrHolder.addEventListener("mouseup", async () => {
         }
         
         updateStatus(currentSection, "✅ OCR dokončeno. Řádky vyplněny.");
+        
+        // Automaticky provést kontrolu po úspěšném OCR
+        setTimeout(() => {
+            performMRZCheck(currentSection);
+        }, 500);
 
     } catch (err) {
         console.error(err);
@@ -658,6 +824,21 @@ ocrHolder.addEventListener("mouseup", async () => {
     } finally {
         // Zavřít sdílení obrazovky po dokončení OCR
         stopScreenShare();
+    }
+});
+
+// Přidání klávesových zkratek pro lepší přístupnost
+document.addEventListener('keydown', (e) => {
+    // ESC pro zavření OCR overlay
+    if (e.key === 'Escape' && currentStream) {
+        stopScreenShare();
+    }
+});
+
+// Cleanup při opuštění stránky
+window.addEventListener('beforeunload', () => {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
     }
 });
 </script>
