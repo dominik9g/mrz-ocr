@@ -2,320 +2,113 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<title>NumerID</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiM1NUM0NUYiLz48dGV4dCB4PSIzMiIgeT0iMzIiIGZvbnQtc2l6ZT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJjZW50cmFsIiBmaWxsPSIjMDAwIiBmb250LXdlaWdodD0iNzAwIiBmb250LWZhbWlseT0iUm9ib3RvLCBTYW5zLXNlcmlmIj5JRDwvdGV4dD48L3N2Zz4=">
-
+<title>MRZ OCR – Tesseract.js 4</title>
 <style>
-  body {
-    font-family: 'IBM Plex Sans', sans-serif;
-    background: #f7f7f5;
-    color: #222;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-  }
-  .wrapper { width: 90%; max-width: 640px; margin: 30px 0; }
-  .header { background: #9fdc00; color: #000; padding: 30px 0; font-size: 3em; font-weight: 700; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 16px; }
-  .header sub { font-size: 0.25em; opacity: 0.3; margin-left: -5px; }
-  .section { margin: 30px 0; padding: 18px 35px 30px 35px; border-radius: 16px; background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s ease; position: relative; }
-  .section h2 { color: #000; font-size: 1.3em; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
-  .help-btn { background: #9fdc00; border: none; color: #000; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; position: relative; transition: background 0.2s; }
-  .help-btn:hover { background: #7cc400; }
-  .tooltip { display: none; position: absolute; top: 0; left: 30px; background: rgba(30, 30, 30, 0.95); color: #fff; padding: 14px 18px; border-radius: 10px; font-size: 0.95em; line-height: 1.5em; text-align: left; z-index: 100; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); }
-  .tooltip b { color: #9fdc00; font-weight: 600; }
-  .help-btn:hover .tooltip { display: block; }
-  input { width: 100%; padding: 10px; font-size: 1em; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 8px; }
-  .kontrola-btn { background: #000; color: #9fdc00; border: none; border-radius: 10px; padding: 10px 22px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-right: 10px; }
-  .kontrola-btn:hover { background: #333; }
-  .ocr-btn { background: #000; color: #9fdc00; border: none; border-radius: 10px; padding: 10px 22px; font-size: 1.05em; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-left: 5px; }
-  .ocr-btn:hover { background: #333; }
-  #popup { display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%) scale(0.7); background-color: #9fdc00; color: #000; padding: 35px 50px; border-radius: 15px; font-size: 1.5em; box-shadow: 0 8px 16px rgba(0,0,0,0.3); z-index: 1000; text-align: center; animation: popupShow 0.3s forwards; }
-  @keyframes popupShow { from { opacity: 0; transform: translateX(-50%) scale(0.7); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
-  #popup button { margin-top: 20px; background: #000; color: #9fdc00; border: none; padding: 12px 30px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer; transition: background 0.2s, color 0.2s; }
-  #popup button:hover { background: #333; color: #fff; }
-  .mrz-result { display: none; position: absolute; top: 0; left: -350px; width: 300px; background: rgba(30, 30, 30, 0.95); color: #fff; padding: 12px 16px; border-radius: 10px; font-size: 0.95em; line-height: 1.4em; text-align: left; box-shadow: 0 6px 18px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); white-space: pre-wrap; opacity: 0; transform: translateX(-20px); transition: opacity 0.4s ease, transform 0.4s ease; }
-  .mrz-result.show { display: block; opacity: 1; transform: translateX(0); }
-  .mrz-result b { color: #9fdc00;}
-  .mrz-result .ok { color: #9fdc00; font-weight:600; }
-  .mrz-result .bad { color: #ff6b6b; font-weight:600; }
-  .insert-btn { background: #888; color: #fff; padding: 10px; font-size: 1em; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 8px; opacity: 0.3; transition: opacity 0.2s; }
-  .insert-btn:hover { opacity: 1; }
-  /* OCR overlay */
-  #video { max-width: 100%; display:none; border:2px solid #333; margin-top:15px; }
-  #selection { position:absolute; border:2px dashed red; pointer-events:none; display:none; }
-  #canvas { display:none; }
+body { font-family: Arial; background:#f3f3f3; padding:20px; }
+#video { max-width: 100%; border:2px solid #333; }
+#selection { position:absolute; border:2px dashed red; pointer-events:none; }
+#canvas { display:none; }
+#output { white-space:pre; background:#fff; padding:10px; border:1px solid #ccc; margin-top:10px; }
 </style>
 </head>
 <body>
-<div class="wrapper">
-  <div class="header">NumerID<sub>v0.2</sub></div>
 
-  <div class="section">
-    <h2>MRZ – OP/NPT/PPP
-      <button class="help-btn">?
-        <div class="tooltip">1. Zadej první, druhý a třetí řádek MRZ včetně šipek.<br>2. Šipky můžeš vkládat pomocí kliknutí na tlačítko vedle vkládacího pole.<br>3. Poté klikni na <b>KONTROLA</b>.<br></div>
-      </button>
-    </h2>
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-      <input type="text" placeholder="Řádek 1 (MRZ ID)">
-      <button class="insert-btn" style="margin-left:5px;">&lt;</button>
-    </div>
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-      <input type="text" placeholder="Řádek 2 (MRZ ID)">
-      <button class="insert-btn" style="margin-left:5px;">&lt;</button>
-    </div>
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-      <input type="text" placeholder="Řádek 3 (MRZ ID)">
-      <button class="insert-btn" style="margin-left:5px;">&lt;</button>
-    </div>
-    <div>
-      <button class="kontrola-btn">KONTROLA</button>
-      <button class="ocr-btn" data-type="ID">OCR</button>
-    </div>
-    <div class="mrz-result" aria-live="polite"></div>
-  </div>
+<h2>MRZ OCR – Tesseract.js 4</h2>
+<button id="shareBtn">Sdílet obrazovku</button>
 
-  <div class="section">
-    <h2>MRZ – Cestovní pas 
-      <button class="help-btn">?
-        <div class="tooltip">1. Zadej první a druhý řádek MRZ včetně šipek.<br>2. Šipky můžeš vkládat pomocí kliknutí na tlačítko vedle vkládacího pole.<br>3. Poté klikni na <b>KONTROLA</b>.<br></div>
-      </button>
-    </h2>
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-      <input type="text" placeholder="Řádek 1 (MRZ pas)">
-      <button class="insert-btn" style="margin-left:5px;">&lt;</button>
-    </div>
-    <div style="display:flex; align-items:center; margin-bottom:8px;">
-      <input type="text" placeholder="Řádek 2 (MRZ pas)">
-      <button class="insert-btn" style="margin-left:5px;">&lt;</button>
-    </div>
-    <div>
-      <button class="kontrola-btn">KONTROLA</button>
-      <button class="ocr-btn" data-type="PAS">OCR</button>
-    </div>
-    <div class="mrz-result" aria-live="polite"></div>
-  </div>
-
-  <!-- Video a canvas pro OCR -->
-  <video id="video" autoplay></video>
-  <div id="selection"></div>
-  <canvas id="canvas"></canvas>
+<div id="holder" style="position:relative; display:inline-block; margin-top:20px;">
+    <video id="video" autoplay></video>
+    <div id="selection"></div>
 </div>
 
-<div id="popup">
-  <span id="popupText"></span><br>
-  <button id="popupBtn">OK</button>
-</div>
+<canvas id="canvas"></canvas>
+<pre id="output"></pre>
 
-<audio id="success">
-  <source src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" type="audio/ogg">
-</audio>
-<audio id="error">
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-</audio>
-
-<!-- Původní script -->
-<script type="module">
-popupBtn.onclick = () => { popup.style.display = 'none'; };
-
-function showPopup(text) {
-  popupText.textContent = text;
-  popup.style.display = 'block';
-}
-
-function charValue(c) { if (!c) return 0; if (c >= '0' && c <= '9') return c.charCodeAt(0)-48; if (c>='A'&&c<='Z') return c.charCodeAt(0)-55; if(c==='<' ) return 0; return 0;}
-function calcMRZDigit(str){ const weights=[7,3,1]; let sum=0; for(let i=0;i<str.length;i++){sum+=charValue(str[i])*weights[i%3];} return (sum%10).toString();}
-function padRight(str,len){ str=str||""; if(str.length>=len) return str.slice(0,len); return str+'<'.repeat(len-str.length);}
-function formatDateYYMMDD(yymmdd,mode='birth'){ if(!/^\d{6}$/.test(yymmdd)) return yymmdd; const yy=parseInt(yymmdd.slice(0,2),10); const mm=yymmdd.slice(2,4); const dd=yymmdd.slice(4,6); const now=new Date(); const currentYY=now.getFullYear()%100; let year; if(mode==='birth'){year=(yy>currentYY)?1900+yy:2000+yy;} else {year=(yy<70)?2000+yy:1900+yy;} return `${dd}.${mm}.${year}`;}
-const countryCodes = {
-  "AFG":"Afghanistan","ALB":"Albania","DZA":"Algeria","ASM":"American Samoa","AND":"Andorra","AGO":"Angola","AIA":"Anguilla",
-  "ATA":"Antarctica","ATG":"Antigua and Barbuda","ARG":"Argentina","ARM":"Armenia","ABW":"Aruba","AUS":"Australia","AUT":"Austria",
-  "AZE":"Azerbaijan","BHS":"Bahamas","BHR":"Bahrain","BGD":"Bangladesh","BRB":"Barbados","BLR":"Belarus","BEL":"Belgium",
-  "BLZ":"Belize","BEN":"Benin","BMU":"Bermuda","BTN":"Bhutan","BOL":"Bolivia","BIH":"Bosnia and Herzegovina","BWA":"Botswana",
-  "BVT":"Bouvet Island","BRA":"Brazil","IOT":"British Indian Ocean Territory","BRN":"Brunei Darussalam","BGR":"Bulgaria",
-  "BFA":"Burkina Faso","BDI":"Burundi","KHM":"Cambodia","CMR":"Cameroon","CAN":"Canada","CPV":"Cape Verde","CYM":"Cayman Islands",
-  "CAF":"Central African Republic","TCD":"Chad","CHL":"Chile","CHN":"China","CXR":"Christmas Island","CCK":"Cocos (Keeling) Islands",
-  "COL":"Colombia","COM":"Comoros","COG":"Congo","COK":"Cook Islands","CRI":"Costa Rica","CIV":"Côte d'Ivoire","HRV":"Croatia",
-  "CUB":"Cuba","CYP":"Cyprus","CZE":"Czech Republic","PRK":"Democratic People's Republic of Korea","COD":"Democratic Republic of the Congo",
-  "DNK":"Denmark","DJI":"Djibouti","DMA":"Dominica","DOM":"Dominican Republic","TMP":"East Timor","ECU":"Ecuador","EGY":"Egypt",
-  "SLV":"El Salvador","GNQ":"Equatorial Guinea","ERI":"Eritrea","EST":"Estonia","ETH":"Ethiopia","FLK":"Falkland Islands (Malvinas)",
-  "FRO":"Faeroe Islands","FJI":"Fiji","FIN":"Finland","FRA":"France","FXX":"France, Metropolitan","GUF":"French Guiana","PYF":"French Polynesia",
-  "GAB":"Gabon","GMB":"Gambia","GEO":"Georgia","D":"Germany","GHA":"Ghana","GIB":"Gibraltar","GRC":"Greece","GRL":"Greenland",
-  "GRD":"Grenada","GLP":"Guadeloupe","GUM":"Guam","GTM":"Guatemala","GIN":"Guinea","GNB":"Guinea-Bissau","GUY":"Guyana","HTI":"Haiti",
-  "HMD":"Heard and McDonald Islands","VAT":"Holy See (Vatican City State)","HND":"Honduras","HKG":"Hong Kong","HUN":"Hungary",
-  "ISL":"Iceland","IND":"India","IDN":"Indonesia","IRN":"Iran, Islamic Republic of","IRQ":"Iraq","IRL":"Ireland","ISR":"Israel",
-  "ITA":"Italy","JAM":"Jamaica","JPN":"Japan","JOR":"Jordan","KAZ":"Kazakhstan","KEN":"Kenya","KIR":"Kiribati","KWT":"Kuwait",
-  "KGZ":"Kyrgyzstan","LAO":"Lao People's Democratic Republic","LVA":"Latvia","LBN":"Lebanon","LSO":"Lesotho","LBR":"Liberia",
-  "LBY":"Libyan Arab Jamahiriya","LIE":"Liechtenstein","LTU":"Lithuania","LUX":"Luxembourg","MDG":"Madagascar","MWI":"Malawi",
-  "MYS":"Malaysia","MDV":"Maldives","MLI":"Mali","MLT":"Malta","MHL":"Marshall Islands","MTQ":"Martinique","MRT":"Mauritania",
-  "MUS":"Mauritius","MYT":"Mayotte","MEX":"Mexico","FSM":"Micronesia, Federated States of","MCO":"Monaco","MNG":"Mongolia",
-  "MSR":"Montserrat","MAR":"Morocco","MOZ":"Mozambique","MMR":"Myanmar","NAM":"Namibia","NRU":"Nauru","NPL":"Nepal",
-  "NLD":"Netherlands, Kingdom of the","ANT":"Netherlands Antilles","NTZ":"Neutral Zone","NCL":"New Caledonia","NZL":"New Zealand",
-  "NIC":"Nicaragua","NER":"Niger","NGA":"Nigeria","NIU":"Niue","NFK":"Norfolk Island","MNP":"Northern Mariana Islands","NOR":"Norway",
-  "OMN":"Oman","PAK":"Pakistan","PLW":"Palau","PAN":"Panama","PNG":"Papua New Guinea","PRY":"Paraguay","PER":"Peru","PHL":"Philippines",
-  "PCN":"Pitcairn","POL":"Poland","PRT":"Portugal","PRI":"Puerto Rico","QAT":"Qatar","KOR":"Republic of Korea","MDA":"Republic of Moldova",
-  "REU":"Réunion","ROM":"Romania","RUS":"Russian Federation","RWA":"Rwanda","SHN":"Saint Helena","KNA":"Saint Kitts and Nevis",
-  "LCA":"Saint Lucia","SPM":"Saint Pierre and Miquelon","VCT":"Saint Vincent and the Grenadines","WSM":"Samoa","SMR":"San Marino",
-  "STP":"Sao Tome and Principe","SAU":"Saudi Arabia","SEN":"Senegal","SYC":"Seychelles","SLE":"Sierra Leone","SGP":"Singapore",
-  "SVK":"Slovakia","SVN":"Slovenia","SLB":"Solomon Islands","SOM":"Somalia","ZAF":"South Africa","SGS":"South Georgia and the South Sandwich Island",
-  "ESP":"Spain","LKA":"Sri Lanka","SDN":"Sudan","SUR":"Suriname","SJM":"Svalbard and Jan Mayen Islands","SWZ":"Swaziland","SWE":"Sweden",
-  "CHE":"Switzerland","SYR":"Syrian Arab Republic","TWN":"Taiwan Province of China","TJK":"Tajikistan","THA":"Thailand",
-  "MKD":"The former Yugoslav Republic of Macedonia","TGO":"Togo","TKL":"Tokelau","TON":"Tonga","TTO":"Trinidad and Tobago",
-  "TUN":"Tunisia","TUR":"Turkey","TKM":"Turkmenistan","TCA":"Turks and Caicos Islands","TUV":"Tuvalu","UGA":"Uganda",
-  "UKR":"Ukraine","ARE":"United Arab Emirates","GBR":"United Kingdom of Great Britain and Northern Ireland - Citizen",
-  "GBD":"United Kingdom of Great Britain and Northern Ireland - Dependent territories citizen",
-  "GBN":"United Kingdom of Great Britain and Northern Ireland - National (overseas)",
-  "GBO":"United Kingdom of Great Britain and Northern Ireland - Overseas citizen",
-  "GBP":"United Kingdom of Great Britain and Northern Ireland - Protected Person",
-  "GBS":"United Kingdom of Great Britain and Northern Ireland - Subject",
-  "TZA":"United Republic of Tanzania","USA":"United States of America","UMI":"United States of America Minor Outlying Islands",
-  "URY":"Uruguay","UZB":"Uzbekistan","VUT":"Vanuatu","VEN":"Venezuela","VNM":"Viet Nam","VGB":"Virgin Islands (Great Britain)",
-  "VIR":"Virgin Islands (United States)","WLF":"Wallis and Futuna Islands","ESH":"Western Sahara","YEM":"Yemen",
-  "ZAR":"Zaire","ZMB":"Zambia","ZWE":"Zimbabwe","XXA":"Bez st. příslušnosti","XXX":"Bez st. příslušnosti","XXK":"Kosovo"
-};
-
-function validatePassport(lines){
-  const [l1,l2] = lines;
-  if(l1.length !== 44 || l2.length !== 44)
-    return {ok:false, html:"❌ Pas má mít 2 řádky po 44 znacích."};
-
-  const issuingCountryCode = l1.substring(2,5);
-  const docNum = l2.substring(0,9);
-  const docCD  = l2[9];
-  const nationalityCode = l2.substring(10,13);
-  const dob = l2.substring(13,19);
-  const dobCD = l2[19];
-  const sex = l2[20];
-  const exp = l2.substring(21,27);
-  const expCD = l2[27];
-  const personalRaw = l2.substring(28,42);
-  const personalCD = l2[42];
-  const compCD = l2[43];
-  const compositeStr = l2.substring(0,10) + l2.substring(13,20) + l2.substring(21,43);
-
-  let out = "<b>Výsledky kontroly pasu:</b>\n\n";
-  out += `Osobní číslo (rč): ${personalRaw.replace(/</g,'')}\n`;
-  out += `Vydavatel: ${countryCodes[issuingCountryCode]||"Neznámý"} (${issuingCountryCode}) ` +
-         ((issuingCountryCode in countryCodes)?"<span class='ok'>✔ OK</span>\n":"<span class='bad'>❌NOK</span>\n");
-  out += `Číslo pasu: ${docNum.replace(/<+$/,'')} ` + 
-         (calcMRZDigit(padRight(docNum,9))===docCD ? "<span class='ok'>✔ OK</span>\n" : "<span class='bad'>❌NOK</span>\n");
-  out += `Národnost: ${countryCodes[nationalityCode]||"Neznámý"} (${nationalityCode}) ` + 
-         ((nationalityCode in countryCodes)?"<span class='ok'>✔ OK</span>\n":"<span class='bad'>❌NOK</span>\n");
-  out += `Datum narození: ${formatDateYYMMDD(dob,'birth')} ` + 
-         (calcMRZDigit(dob)===dobCD ? "<span class='ok'>✔ OK</span>\n" : "<span class='bad'>❌NOK</span>\n");
-  out += `Datum expirace: ${formatDateYYMMDD(exp,'expiry')} ` + 
-         (calcMRZDigit(exp)===expCD ? "<span class='ok'>✔ OK</span>\n" : "<span class='bad'>❌NOK</span>\n");
-  out += `Kontrolní číslice z čísla dokladu: ${calcMRZDigit(padRight(docNum,9))===docCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}\n`;
-  out += `Kontrolní číslice z data narození: ${calcMRZDigit(dob)===dobCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}\n`;
-  out += `Kontrolní číslice z data expirace: ${calcMRZDigit(exp)===expCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}\n`;
-  out += `Kontrolní číslice z osobního čísla: ${calcMRZDigit(padRight(personalRaw,14))===personalCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}\n`;
-  out += `Finalní kontrolní číslice: ${calcMRZDigit(compositeStr)===compCD ? "<span class='ok'>✔ OK</span>" : "<span class='bad'>❌NOK</span>"}`;
-
-  return {ok:true, html:out};
-}
-
-function validateID(lines){
-  const [l1,l2,l3]=lines;
-  if(l1.length!==30 || l2.length!==30 || l3.length!==30) return {ok:false, html:"❌ Doklad má mít 3 řádky po 30 znacích."};
-
-  const docnum=l1.substring(5,14), docCD=l1[14];
-  const dob=l2.substring(0,6), dobCD=l2[6];
-  const exp=l2.substring(8,14), expCD=l2[14];
-  const personal=l2.substring(18,29); // 11 znaků TD1
-  const composite=padRight(docnum,9)+docCD+dob+dobCD+exp+expCD+padRight(personal,11);
-  const compositeCD=l2[29];
-
-  let out="<b>Výsledky kontroly OP/NPT/PPP:</b>\n\n";
-  const personalTrimmed = personal.replace(/</g,'').trim();
-  if(personalTrimmed) out+="Osobní číslo: "+personalTrimmed+"\n";
-  out+="Číslo dokladu: "+docnum+" "+(calcMRZDigit(padRight(docnum,9))===docCD?"<span class='ok'>✔ OK</span>\n":"<span class='bad'>❌NOK</span>\n");
-  out+="Datum narození: "+formatDateYYMMDD(dob,'birth')+" "+(calcMRZDigit(dob)===dobCD?"<span class='ok'>✔ OK</span>\n":"<span class='bad'>❌NOK</span>\n");
-  out+="Datum expirace: "+formatDateYYMMDD(exp,'expiry')+" "+(calcMRZDigit(exp)===expCD?"<span class='ok'>✔ OK</span>\n":"<span class='bad'>❌NOK</span>\n");
-
-
-  out+="Kontrolní číslice: "+(calcMRZDigit(composite)===compositeCD?"<span class='ok'>✔ OK</span>":"<span class='bad'>❌NOK</span>");
-  return {ok:true, html:out};
-}
-
-document.querySelectorAll(".section").forEach(sec=>{
-  const btn=sec.querySelector(".kontrola-btn");
-  const resultDiv=sec.querySelector(".mrz-result");
-  btn.addEventListener("click",()=>{
-    const inputs=[...sec.querySelectorAll("input")].map(i=>i.value.trim().toUpperCase());
-    let output;
-    if(inputs.length===3){output=validateID(inputs).html;}
-    else if(inputs.length===2){output=validatePassport(inputs).html;}
-    else{output="❌ Neplatný počet řádků.";}
-    resultDiv.innerHTML=output;
-    resultDiv.classList.add('show');
-  });
-});
-
-document.querySelectorAll('.insert-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const input = btn.previousElementSibling;
-    if(input && input.tagName === 'INPUT'){ input.value += '<'; input.focus(); }
-  });
-});
-</script>
-
-<!-- OCR script embed -->
+<!-- UMD build Tesseract 4 -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+
 <script>
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
+const output = document.getElementById("output");
 const selection = document.getElementById("selection");
-let stream, selecting=false, startX, startY, endX, endY;
+let stream;
 
-async function startScreenShare() {
-    if(stream) return;
+// Sdílení obrazovky
+document.getElementById("shareBtn").onclick = async () => {
     try {
-        stream = await navigator.mediaDevices.getDisplayMedia({ video:true });
+        stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         video.srcObject = stream;
-        video.style.display="block";
-        selection.style.display="block";
-    } catch(err){ alert("Chyba při sdílení obrazovky: "+err.message); }
-}
+        output.textContent = "Sdílení obrazovky aktivní, vyber oblast pro OCR...";
+    } catch (err) {
+        console.error(err);
+        output.textContent = "Chyba při sdílení obrazovky: " + err.message;
+    }
+};
 
-document.querySelectorAll('.ocr-btn').forEach(btn=>{
-  btn.addEventListener('click', async ()=>{
-    const type = btn.dataset.type;
-    await startScreenShare();
-    alert(`Vyber oblast MRZ pro ${type} a OCR proběhne automaticky.`);
-    
-    const mouseUpHandler = async ()=>{
-        selecting=false;
-        const sx=Math.min(startX,endX), sy=Math.min(startY,endY), sw=Math.abs(endX-startX), sh=Math.abs(endY-startY);
-        canvas.width=sw; canvas.height=sh;
-        canvas.getContext('2d').drawImage(video,sx,sy,sw,sh,0,0,sw,sh);
-        const result=await Tesseract.recognize(canvas,'mrz',{ langPath:'https://dominik9g.github.io/mrz-ocr/', tessedit_char_whitelist:"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<"});
-        const lines = result.data.text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l);
-        const inputs = btn.closest('.section').querySelectorAll('input');
-        if(type==='PAS' && lines.length>=2){ inputs[0].value=lines[0]; inputs[1].value=lines[1]; }
-        if(type==='ID' && lines.length>=3){ inputs[0].value=lines[0]; inputs[1].value=lines[1]; inputs[2].value=lines[2]; }
-        video.removeEventListener('mouseup', mouseUpHandler);
-    };
-    video.addEventListener('mouseup', mouseUpHandler);
-    video.addEventListener('mousedown', e=>{
-        const rect=video.getBoundingClientRect();
-        selecting=true;
-        startX=e.clientX-rect.left; startY=e.clientY-rect.top;
-        selection.style.left=startX+'px'; selection.style.top=startY+'px';
-        selection.style.width='0px'; selection.style.height='0px';
-    });
-    video.addEventListener('mousemove', e=>{
-        if(!selecting) return;
-        const rect=video.getBoundingClientRect();
-        endX=e.clientX-rect.left; endY=e.clientY-rect.top;
-        selection.style.left=Math.min(startX,endX)+'px';
-        selection.style.top=Math.min(startY,endY)+'px';
-        selection.style.width=Math.abs(endX-startX)+'px';
-        selection.style.height=Math.abs(endY-startY)+'px';
-    });
-  });
+let selecting = false;
+let startX, startY, endX, endY;
+
+// Začátek výběru
+document.getElementById("holder").addEventListener("mousedown", e => {
+    if (!stream) return;
+    const rect = video.getBoundingClientRect();
+    selecting = true;
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    selection.style.left = startX + "px";
+    selection.style.top = startY + "px";
+    selection.style.width = "0px";
+    selection.style.height = "0px";
+});
+
+// Pohyb myši při výběru
+document.getElementById("holder").addEventListener("mousemove", e => {
+    if (!selecting) return;
+    const rect = video.getBoundingClientRect();
+    endX = e.clientX - rect.left;
+    endY = e.clientY - rect.top;
+    selection.style.left = Math.min(startX, endX) + "px";
+    selection.style.top = Math.min(startY, endY) + "px";
+    selection.style.width = Math.abs(endX - startX) + "px";
+    selection.style.height = Math.abs(endY - startY) + "px";
+});
+
+// Konec výběru a OCR
+document.getElementById("holder").addEventListener("mouseup", async () => {
+    if (!stream || !selecting) return;
+    selecting = false;
+
+    const sx = Math.min(startX, endX);
+    const sy = Math.min(startY, endY);
+    const sw = Math.abs(endX - startX);
+    const sh = Math.abs(endY - startY);
+
+    canvas.width = sw;
+    canvas.height = sh;
+    const ctx = canvas.getContext("2d");
+
+    await new Promise(r => setTimeout(r, 50));
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+
+    output.textContent = "Probíhá OCR…";
+
+    try {
+        const result = await Tesseract.recognize(
+            canvas,
+            'mrz',
+            {
+                langPath: 'https://dominik9g.github.io/mrz-ocr/', // URL k mrz.traineddata.gz
+                tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<",
+                logger: m => console.log(m)
+            }
+        );
+
+        output.textContent = result.data.text;
+    } catch (err) {
+        console.error(err);
+        output.textContent = "Chyba při OCR: " + err.message;
+    }
 });
 </script>
 
